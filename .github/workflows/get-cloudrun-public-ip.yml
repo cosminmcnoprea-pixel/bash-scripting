@@ -21,7 +21,7 @@ on:
 
 jobs:
   get-ip:
-    name: Resolve public IP (LB first, DNS fallback)
+    name: Resolve public IP
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]

@@ -55,8 +55,7 @@ jobs:
         id: ip
         shell: bash
         run: |
-          chmod +x ./bash-scripting/get-cloudrun-public-ip.sh
-          REGION="${{ inputs.region }}" SERVICE_NAME="${{ inputs.service_name }}" ./bash-scripting/get-cloudrun-public-ip.sh "${{ inputs.environment }}"
+          REGION="${{ inputs.region }}" SERVICE_NAME="${{ inputs.service_name }}" ./get-cloudrun-public-ip.sh "${{ inputs.environment }}"
 
       - name: Summary
         shell: bash

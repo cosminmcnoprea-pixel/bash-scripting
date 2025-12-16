@@ -51,11 +51,6 @@ jobs:
           workload-identity-provider: ${{ secrets.WIF_PROVIDER_PROD }}
           service-account: ${{ secrets.WIF_SERVICE_ACCOUNT_PROD }}
 
-      - name: Debug
-        shell: bash
-        run: |
-          gcloud compute addresses describe php-app-lb-ip --global --format='value(address)'
-
       - name: Run script
         id: ip
         shell: bash

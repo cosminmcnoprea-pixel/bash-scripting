@@ -22,6 +22,7 @@ on:
 jobs:
   get-ip:
     name: Resolve public IP
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
@@ -55,7 +56,7 @@ jobs:
         shell: bash
         run: |
           chmod +x ./bash-scripting/get-cloudrun-public-ip.sh
-          REGION="${{ inputs.region }}" SERVICE_NAME="${{ inputs.service_name }}" ./bash-scripting/@get-cloudrun-public-ip.sh "${{ inputs.environment }}"
+          REGION="${{ inputs.region }}" SERVICE_NAME="${{ inputs.service_name }}" ./bash-scripting/get-cloudrun-public-ip.sh "${{ inputs.environment }}"
 
       - name: Summary
         shell: bash

@@ -52,3 +52,27 @@ if [[ -n "${LB_IP}" ]]; then
   fi
   exit 0
 fi
+
+# If the global address isn't there (or name differs), try to read the IP from the LB forwarding rules.
+FR_IP="$(gcloud compute forwarding-rules list \
+  --global \
+  --project "${PROJECT_ID}" \
+  --filter="name~'${SERVICE_NAME}.*forwarding-rule'" \
+  --format='value(IPAddress)' 2>/dev/null | head -n 1 || true)"
+
+if [[ -n "${FR_IP}" ]]; then
+  log "LB IP (from forwarding rules) => ${FR_IP}"
+  echo "${FR_IP}"
+  if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
+    echo "ip=${FR_IP}" >> "${GITHUB_OUTPUT}"
+  fi
+  exit 0
+fi
+
+# No other fallback by design. If there's no LB IP, we treat it as an error.
+log "Debug: listing global addresses that look related"
+gcloud compute addresses list --global --project "${PROJECT_ID}" --filter="name~'${SERVICE_NAME}'" --format="table(name,address)" 2>/dev/null || true
+log "Debug: listing global forwarding rules that look related"
+gcloud compute forwarding-rules list --global --project "${PROJECT_ID}" --filter="name~'${SERVICE_NAME}'" --format="table(name,IPAddress)" 2>/dev/null || true
+
+die "Could not find a load balancer IP in project '${PROJECT_ID}' (checked global address '${LB_IP_NAME}' and forwarding rules)."

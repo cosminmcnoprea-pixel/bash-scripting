@@ -61,5 +61,9 @@ jobs:
         shell: bash
         run: |
           echo "IP: ${{ steps.ip.outputs.ip }}"
+          if [ -z "${{ steps.ip.outputs.ip }}" ]; then
+            echo "No IP output. The script likely failed before writing outputs."
+            exit 1
+          fi
 
 

@@ -1,0 +1,70 @@
+name: Get Cloud Run public IP
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+      region:
+        description: "GCP region (optional)"
+        required: false
+        default: "europe-west3"
+      service_name:
+        description: "Cloud Run service name (optional)"
+        required: false
+        default: "php-app"
+
+jobs:
+  get-ip:
+    name: Resolve public IP (LB first, DNS fallback)
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pick env-specific auth
+        id: env
+        shell: bash
+        run: |
+          echo "env=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+
+      - name: GCP auth (dev)
+        if: steps.env.outputs.env == 'dev'
+        uses: cosminmcnoprea-pixel/gh-actions/.github/actions/gcp-auth@main
+        with:
+          workload-identity-provider: ${{ secrets.WIF_PROVIDER_DEV }}
+          service-account: ${{ secrets.WIF_SERVICE_ACCOUNT_DEV }}
+
+      - name: GCP auth (prod)
+        if: steps.env.outputs.env == 'prod'
+        uses: cosminmcnoprea-pixel/gh-actions/.github/actions/gcp-auth@main
+        with:
+          workload-identity-provider: ${{ secrets.WIF_PROVIDER_PROD }}
+          service-account: ${{ secrets.WIF_SERVICE_ACCOUNT_PROD }}
+
+      - name: Run script
+        id: ip
+        shell: bash
+        run: |
+          chmod +x ./bash-scripting/get-cloudrun-public-ip.sh
+          REGION="${{ inputs.region }}" SERVICE_NAME="${{ inputs.service_name }}" ./bash-scripting/@get-cloudrun-public-ip.sh "${{ inputs.environment }}"
+
+      - name: Summary
+        shell: bash
+        run: |
+          echo "OS: ${{ matrix.os }}"
+          echo "IP: ${{ steps.ip.outputs.ip }}"
+
+

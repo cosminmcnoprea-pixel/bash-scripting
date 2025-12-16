@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
-# @get-cloudrun-public-ip.sh
+# get-cloudrun-public-ip.sh
 # Small helper script meant to run locally OR in GitHub Actions.
-#
 # Prints a "public IP" for a Cloud Run deployment:
 # The global Load Balancer IP
-#
 # Usage:
 #   ./get-cloudrun-public-ip.sh dev
 #   ./get-cloudrun-public-ip.sh prod
-#
 # Optional env vars:
 #   PROJECT_ID, REGION, SERVICE_NAME, LB_IP_NAME
 
